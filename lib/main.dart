@@ -1,5 +1,8 @@
+import 'package:employee_sign_up/home_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:email_validator/email_validator.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,39 +15,47 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'EmployeeApp',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Employee Signup Page'),
+      home: const SignUpPage(title: 'Employee Signup Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _SignUpPageState extends State<SignUpPage> {
   String? selectedCountry;
   String? selectedCity;
 
   List<String>? countryList = ["India", "Russia", "China", "Japan"];
   List<String>? cityList = [];
+  List<TextEditingController> textFieldControllerList =
+      List.filled(5, TextEditingController());
   Map<String, List<String>> countryCityMap = {
-    "India": ["Hyderabad", "Pune", "Ahmedabad", "Warangal"],
+    "India": ["Warangal", "Hyderabad", "Ahmedabad", "Pune"],
     "China": ["Beijing", "Shanghai", "Wuhan"],
     "Japan": ["Tokyo", "Hiroshima", "Yokohama"],
     "Russia": ["Moscow", "Saint Petersburg"]
   };
 
-  var snackBar = const SnackBar(content: Text("Submit Clicked"));
+  _SignUpPageState() {
+    for (int i = 1; i < textFieldControllerList.length; i++) {
+      textFieldControllerList[i] = TextEditingController();
+    }
+  }
+
+  final Widget currentPage = const SignUpPage(title: 'Employee Signup Page');
 
   @override
   Widget build(BuildContext context) {
@@ -69,32 +80,42 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListView(
               //mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const TextField(
+                TextField(
+                  controller: textFieldControllerList[0],
                   textInputAction: TextInputAction.next,
-                  style: TextStyle(fontSize: 20),
-                  decoration: InputDecoration(
+                  style: const TextStyle(fontSize: 20),
+                  decoration: const InputDecoration(
                       hintText: "First Name",
                       contentPadding:
                           EdgeInsets.only(left: 8, right: 8, top: 8)),
                 ),
-                const TextField(
+                TextField(
+                  controller: textFieldControllerList[1],
                   textInputAction: TextInputAction.next,
-                  style: TextStyle(fontSize: 20),
-                  decoration: InputDecoration(
+                  style: const TextStyle(fontSize: 20),
+                  decoration: const InputDecoration(
                       hintText: "Last Name",
                       contentPadding:
                           EdgeInsets.only(left: 8, right: 8, top: 8)),
                 ),
-                const TextField(
-                  textInputAction: TextInputAction.next,
-                  style: TextStyle(fontSize: 20),
-                  decoration: InputDecoration(
-                      hintText: "Email",
-                      contentPadding:
-                          EdgeInsets.only(left: 8, right: 8, top: 8)),
-                ),
+                Form(
+                    autovalidateMode: AutovalidateMode.always,
+                    child: TextFormField(
+                      controller: textFieldControllerList[2],
+                      textInputAction: TextInputAction.next,
+                      style: const TextStyle(fontSize: 20),
+                      validator: (value) => EmailValidator.validate(value!)
+                          ? null
+                          : "Please enter a valid email",
+                      decoration: const InputDecoration(
+                          hintText: "Email",
+                          contentPadding:
+                              EdgeInsets.only(left: 8, right: 8, top: 8)),
+                    )),
                 TextField(
+                  controller: textFieldControllerList[3],
                   textInputAction: TextInputAction.next,
+                  maxLength: 12,
                   keyboardType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
@@ -125,9 +146,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     }).toList(),
                     onChanged: onCityDropDownChanged),
-                const TextField(
-                  style: TextStyle(fontSize: 20),
-                  decoration: InputDecoration(
+                TextField(
+                  controller: textFieldControllerList[4],
+                  style: const TextStyle(fontSize: 20),
+                  decoration: const InputDecoration(
                       hintText: "Address",
                       contentPadding:
                           EdgeInsets.only(left: 8, right: 8, top: 8)),
@@ -135,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                     margin: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                        onPressed: submitButtonClick,
+                        onPressed: validateFormFields,
                         child: const Text("Submit"))),
               ],
             ),
@@ -157,7 +179,26 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void submitButtonClick() {
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  void validateFormFields() {
+    var snackBar = const SnackBar(content: Text("Please fill all fields"));
+    bool areFieldsExempted = false;
+    for (int i = 0; i < textFieldControllerList.length; i++) {
+      if (kDebugMode) {
+        print("TEST:${textFieldControllerList[i].text}");
+      }
+      if (textFieldControllerList[i].text.isEmpty) {
+        areFieldsExempted = true;
+        break;
+      }
+    }
+    if (areFieldsExempted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      //Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
   }
 }
