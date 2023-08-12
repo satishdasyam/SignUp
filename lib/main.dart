@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      //home: const SignUpPage(title: 'Employee Signup Page'),
       home: const SignUpPage(title: 'Employee Signup Page'),
     );
   }
@@ -191,14 +192,40 @@ class _SignUpPageState extends State<SignUpPage> {
         break;
       }
     }
-    if (areFieldsExempted) {
+    if (areFieldsExempted || selectedCountry == null) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
-      //Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      showSuccessAlert();
     }
+  }
+
+  void showSuccessAlert() {
+    Widget okButton = TextButton(
+      child: const Text("OK"),
+      onPressed: () {
+        Navigator.pop(context); // Dismiss dialog
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("SignUp Success"),
+      content: const Text("Signup is success"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
