@@ -1,4 +1,5 @@
 import 'package:employee_sign_up/home_page.dart';
+import 'package:employee_sign_up/signup_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      //home: const SignUpPage(title: 'Employee Signup Page'),
       home: const SignUpPage(title: 'Employee Signup Page'),
     );
   }
@@ -56,7 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  final Widget currentPage = const SignUpPage(title: 'Employee Signup Page');
+  //final Widget currentPage = const SignUpPage(title: 'Employee Signup Page');
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,18 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
+          centerTitle: false,
           title: Text(widget.title),
+          leading: IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.home),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.more_vert),
+            ),
+          ],
         ),
         body: Center(
           // Center is a layout widget. It takes a single child and positions it
@@ -206,7 +217,17 @@ class _SignUpPageState extends State<SignUpPage> {
         Navigator.pop(context); // Dismiss dialog
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    signupModel: SignupModel(
+                        firstName: textFieldControllerList[0].text,
+                        lastName: textFieldControllerList[1].text,
+                        email: textFieldControllerList[2].text,
+                        phoneNumber: textFieldControllerList[3].text,
+                        country: selectedCountry ?? "",
+                        city: selectedCity ?? "",
+                        address: textFieldControllerList[4].text),
+                  )),
         );
       },
     );

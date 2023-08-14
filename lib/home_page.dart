@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:employee_sign_up/signup_model.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.signupModel});
+
+  final SignupModel signupModel;
 
   @override
   Widget build(BuildContext context) {
