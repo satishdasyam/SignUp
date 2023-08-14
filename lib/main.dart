@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -50,6 +51,8 @@ class _SignUpPageState extends State<SignUpPage> {
     "Russia": ["Moscow", "Saint Petersburg"]
   };
 
+  late bool isProgressIndicatorToBeShown;
+
   _SignUpPageState() {
     for (int i = 1; i < textFieldControllerList.length; i++) {
       textFieldControllerList[i] = TextEditingController();
@@ -57,6 +60,12 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   //final Widget currentPage = const SignUpPage(title: 'Employee Signup Page');
+
+  @override
+  void initState() {
+    super.initState();
+    isProgressIndicatorToBeShown = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,90 +98,97 @@ class _SignUpPageState extends State<SignUpPage> {
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             width: double.infinity,
             height: double.infinity,
-            child: ListView(
-              //mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextField(
-                  controller: textFieldControllerList[0],
-                  textInputAction: TextInputAction.next,
-                  style: const TextStyle(fontSize: 20),
-                  decoration: const InputDecoration(
-                      hintText: "First Name",
-                      contentPadding:
-                          EdgeInsets.only(left: 8, right: 8, top: 8)),
-                ),
-                TextField(
-                  controller: textFieldControllerList[1],
-                  textInputAction: TextInputAction.next,
-                  style: const TextStyle(fontSize: 20),
-                  decoration: const InputDecoration(
-                      hintText: "Last Name",
-                      contentPadding:
-                          EdgeInsets.only(left: 8, right: 8, top: 8)),
-                ),
-                Form(
-                    autovalidateMode: AutovalidateMode.always,
-                    child: TextFormField(
-                      controller: textFieldControllerList[2],
-                      textInputAction: TextInputAction.next,
-                      style: const TextStyle(fontSize: 20),
-                      validator: (value) => EmailValidator.validate(value!)
-                          ? null
-                          : "Please enter a valid email",
-                      decoration: const InputDecoration(
-                          hintText: "Email",
-                          contentPadding:
-                              EdgeInsets.only(left: 8, right: 8, top: 8)),
-                    )),
-                TextField(
-                  controller: textFieldControllerList[3],
-                  textInputAction: TextInputAction.next,
-                  maxLength: 12,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
-                  style: const TextStyle(fontSize: 20),
-                  decoration: const InputDecoration(
-                      hintText: "Mobile Number",
-                      contentPadding:
-                          EdgeInsets.only(left: 8, right: 8, top: 8)),
-                ),
-                DropdownButton(
-                    hint: const Text("Countries"),
-                    value: selectedCountry,
-                    items: countryList?.map((String items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Text(items),
-                      );
-                    }).toList(),
-                    onChanged: onCountryDropDownChanged),
-                DropdownButton(
-                    hint: const Text("Cities"),
-                    value: selectedCity,
-                    items: cityList?.map((String items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Text(items),
-                      );
-                    }).toList(),
-                    onChanged: onCityDropDownChanged),
-                TextField(
-                  controller: textFieldControllerList[4],
-                  style: const TextStyle(fontSize: 20),
-                  decoration: const InputDecoration(
-                      hintText: "Address",
-                      contentPadding:
-                          EdgeInsets.only(left: 8, right: 8, top: 8)),
-                ),
-                Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    child: ElevatedButton(
-                        onPressed: validateFormFields,
-                        child: const Text("Submit"))),
-              ],
-            ),
+            child: Stack(children: <Widget>[
+              ListView(
+                //mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextField(
+                    controller: textFieldControllerList[0],
+                    textInputAction: TextInputAction.next,
+                    style: const TextStyle(fontSize: 20),
+                    decoration: const InputDecoration(
+                        hintText: "First Name",
+                        contentPadding:
+                            EdgeInsets.only(left: 8, right: 8, top: 8)),
+                  ),
+                  TextField(
+                    controller: textFieldControllerList[1],
+                    textInputAction: TextInputAction.next,
+                    style: const TextStyle(fontSize: 20),
+                    decoration: const InputDecoration(
+                        hintText: "Last Name",
+                        contentPadding:
+                            EdgeInsets.only(left: 8, right: 8, top: 8)),
+                  ),
+                  Form(
+                      autovalidateMode: AutovalidateMode.always,
+                      child: TextFormField(
+                        controller: textFieldControllerList[2],
+                        textInputAction: TextInputAction.next,
+                        style: const TextStyle(fontSize: 20),
+                        validator: (value) => EmailValidator.validate(value!)
+                            ? null
+                            : "Please enter a valid email",
+                        decoration: const InputDecoration(
+                            hintText: "Email",
+                            contentPadding:
+                                EdgeInsets.only(left: 8, right: 8, top: 8)),
+                      )),
+                  TextField(
+                    controller: textFieldControllerList[3],
+                    textInputAction: TextInputAction.next,
+                    maxLength: 12,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                    style: const TextStyle(fontSize: 20),
+                    decoration: const InputDecoration(
+                        hintText: "Mobile Number",
+                        contentPadding:
+                            EdgeInsets.only(left: 8, right: 8, top: 8)),
+                  ),
+                  DropdownButton(
+                      hint: const Text("Countries"),
+                      value: selectedCountry,
+                      items: countryList?.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
+                      onChanged: onCountryDropDownChanged),
+                  DropdownButton(
+                      hint: const Text("Cities"),
+                      value: selectedCity,
+                      items: cityList?.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
+                      onChanged: onCityDropDownChanged),
+                  TextField(
+                    controller: textFieldControllerList[4],
+                    style: const TextStyle(fontSize: 20),
+                    decoration: const InputDecoration(
+                        hintText: "Address",
+                        contentPadding:
+                            EdgeInsets.only(left: 8, right: 8, top: 8)),
+                  ),
+                  Container(
+                      margin: const EdgeInsets.only(top: 20),
+                      child: ElevatedButton(
+                          onPressed: validateFormFields,
+                          child: const Text("Submit"))),
+                ],
+              ),
+              Visibility(
+                  visible: isProgressIndicatorToBeShown,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  )),
+            ]),
           ),
         ));
   }
@@ -206,11 +222,37 @@ class _SignUpPageState extends State<SignUpPage> {
     if (areFieldsExempted || selectedCountry == null) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
-      showSuccessAlert();
+      registerDataInBackend();
     }
   }
 
-  void showSuccessAlert() {
+  void registerDataInBackend() async {
+    setState(() {
+      isProgressIndicatorToBeShown = true;
+    });
+
+    SignupModel signupModel = SignupModel(
+        firstName: textFieldControllerList[0].text,
+        lastName: textFieldControllerList[1].text,
+        email: textFieldControllerList[2].text,
+        phoneNumber: textFieldControllerList[3].text,
+        country: selectedCountry ?? "",
+        city: selectedCity ?? "",
+        address: textFieldControllerList[4].text);
+    http.Response response =
+        await http.get(Uri.parse("https://jsonplaceholder.typicode.com/users"));
+    // List<dynamic> userList = jsonDecode(response.body);
+    setState(() {
+      isProgressIndicatorToBeShown = false;
+    });
+    if (response.statusCode == 200) {
+      showSuccessAlert(signupModel);
+    } else {
+      //Failed
+    }
+  }
+
+  void showSuccessAlert(SignupModel registeredData) {
     Widget okButton = TextButton(
       child: const Text("OK"),
       onPressed: () {
@@ -219,14 +261,7 @@ class _SignUpPageState extends State<SignUpPage> {
           context,
           MaterialPageRoute(
               builder: (context) => HomePage(
-                    signupModel: SignupModel(
-                        firstName: textFieldControllerList[0].text,
-                        lastName: textFieldControllerList[1].text,
-                        email: textFieldControllerList[2].text,
-                        phoneNumber: textFieldControllerList[3].text,
-                        country: selectedCountry ?? "",
-                        city: selectedCity ?? "",
-                        address: textFieldControllerList[4].text),
+                    signupModel: registeredData,
                   )),
         );
       },
